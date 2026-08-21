@@ -54,6 +54,8 @@ radio and returns the formatted block after each tool call. It does not
 import Hermes. The in-repo loop is `HermesTurn`
 (`python examples/hermes_loop.py`). Patch points for a real Hermes tree:
 [`docs/hermes-wiring.md`](docs/hermes-wiring.md).
+Upstream handoff (new PR, do not reuse #87441):
+[`docs/hermes-upstream-work-plan.md`](docs/hermes-upstream-work-plan.md).
 
 ## Status
 
