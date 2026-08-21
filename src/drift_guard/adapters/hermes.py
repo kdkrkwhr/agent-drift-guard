@@ -82,3 +82,27 @@ class HermesDriftGuard:
         site: InjectionSite = DEFAULT_INJECTION_SITE,
     ) -> str:
         return format_injection(self.on_tool_call_complete(), site=site)
+
+
+class HermesTurn:
+    """One Hermes-shaped turn: radio buffers, tool complete injects, no extra LLM call."""
+
+    def __init__(self) -> None:
+        self.guard = HermesDriftGuard()
+        self.transcript: list[dict[str, str]] = []
+        self.model_calls = 0
+
+    def wait_for_mention(
+        self,
+        event: CrossAgentMessage | HermesRadioEvent | Mapping[str, Any],
+    ) -> None:
+        self.guard.on_radio_message(event)
+
+    def request_tool(self) -> None:
+        """Count the model call that emitted tool_calls. Radio must not call this."""
+        self.model_calls += 1
+
+    def complete_tool(self, name: str, result: str) -> str:
+        content = append_to_tool_result(result, self.guard.drain_for_injection())
+        self.transcript.append({"role": "tool", "name": name, "content": content})
+        return content
