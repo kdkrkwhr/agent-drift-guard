@@ -48,7 +48,7 @@ NousResearch CONTRIBUTING은 서드파티 플러그인을 `plugins/`에 넣는 P
 작업 저장소  : github.com/kdkrkwhr/hermes-agent
 업스트림     : github.com/NousResearch/hermes-agent
 베이스 브랜치: upstream/main   (origin/main을 fetch 후 동기화된 것)
-새 브랜치    : feat/session-busy-hook
+새 브랜치    : feat/gateway-session-is-busy
 새 PR 대상   : NousResearch/hermes-agent  (base = main)
 건드리면 안 됨: feat/native-watch-tool
 건드리면 안 됨: GitHub PR #87441
@@ -129,10 +129,10 @@ git remote add upstream https://github.com/NousResearch/hermes-agent.git
 git fetch upstream
 git fetch origin
 
-git checkout -b feat/session-busy-hook upstream/main
+git checkout -b feat/gateway-session-is-busy upstream/main
 
 git branch --show-current
-# 반드시 feat/session-busy-hook
+# 반드시 feat/gateway-session-is-busy
 # feat/native-watch-tool 이면 잘못됨. 여기서 멈춰라.
 ```
 
@@ -338,11 +338,11 @@ No default behavior change when no plugin is loaded.
 ## 9. PR (테스트 초록 후에만)
 
 ```bash
-git push -u origin feat/session-busy-hook
+git push -u origin feat/gateway-session-is-busy
 
 gh pr create --repo NousResearch/hermes-agent \
   --base main \
-  --head kdkrkwhr:feat/session-busy-hook \
+  --head kdkrkwhr:feat/gateway-session-is-busy \
   --title "feat(gateway): let plugins see whether a session is busy"
 ```
 
@@ -353,7 +353,7 @@ gh pr view --json baseRefName,headRefName,url,title
 ```
 
 - `baseRefName` 이 `main` 이어야 함
-- `headRefName` 이 `feat/session-busy-hook` 이어야 함
+- `headRefName` 이 `feat/gateway-session-is-busy` 이어야 함
 - `feat/native-watch-tool` 이면 **즉시 PR을 닫고** 다시 만들어라. 수정하지 말고 새로.
 
 PR 본문 (그대로 써도 됨):
@@ -362,7 +362,7 @@ PR 본문 (그대로 써도 됨):
 ## Note
 
 Separate from #87441 (native watch tool). This PR uses branch
-`feat/session-busy-hook` off upstream `main`. No overlapping files.
+`feat/gateway-session-is-busy` off upstream `main`. No overlapping files.
 
 ## Why
 
@@ -435,7 +435,7 @@ ln -s /path/to/agent-drift-guard/hermes_plugin/agent-drift-guard \
 ## 12. 체크리스트 (PR 직전 소리 내어 읽기)
 
 - [ ] `git remote -v` 에 hermes-agent (kdkrkwhr) 가 origin
-- [ ] 브랜치 이름이 `feat/session-busy-hook`
+- [ ] 브랜치 이름이 `feat/gateway-session-is-busy`
 - [ ] `git merge-base --is-ancestor upstream/main HEAD` 성공
 - [ ] `git diff --stat upstream/main` 에 watch 파일 없음
 - [ ] `plugins/agent-drift-guard` 없음
@@ -443,7 +443,7 @@ ln -s /path/to/agent-drift-guard/hermes_plugin/agent-drift-guard \
 - [ ] `session_is_busy` 테스트 통과
 - [ ] 훅에 `agent_busy` 전달 테스트 통과
 - [ ] 플러그인 없을 때 기본 디스패치 불변
-- [ ] PR base = `main`, head = `kdkrkwhr:feat/session-busy-hook`
+- [ ] PR base = `main`, head = `kdkrkwhr:feat/gateway-session-is-busy`
 - [ ] PR 본문에 “Separate from #87441” 문구 있음
 
 하나라도 체크 못하면 `gh pr create` 하지 마라.
