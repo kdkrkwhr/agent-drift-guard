@@ -1,0 +1,4 @@
+{
+  "name": "agent-drift-guard",
+  "install": "pip install -e . pytest"
+}
