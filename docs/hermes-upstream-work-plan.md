@@ -1,5 +1,10 @@
 # Hermes 0-turn 업스트림 작업계획서 (정정)
 
+> 무료/소형 에이전트에게 일을 맡길 때는 이 문서 대신
+> **[`docs/HERMES_AGENT_EXECUTOR_PLAN.md`](HERMES_AGENT_EXECUTOR_PLAN.md)** 만 주어라.
+> 그 문서는 저장소 혼동 방지와 금지 목록이 더 구체적이다.
+
+
 작성: 2026-08-21  
 정정: 2026-08-21 — 이미 열린 업스트림 PR(#87441)과 **새 PR** 규칙을 반영  
 실행 주체: **당신** (`kdkrkwhr`) — 핸드오프. AI 커밋을 hermes-agent에 남기지 마세요.  
