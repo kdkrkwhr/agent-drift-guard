@@ -2,19 +2,7 @@
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[project]
-name = "agent-drift-guard"
-version = "0.0.1"
-description = "0-turn passive awareness for multi-agent systems"
-readme = "README.md"
-requires-python = ">=3.10"
-
-[project.optional-dependencies]
-dev = ["pytest>=7"]
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+addopts = "-q"

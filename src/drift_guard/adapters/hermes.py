@@ -1,63 +1,13 @@
 """Hermes reference adapter for agent-drift-guard.
 
 Shows how to wire DriftGuardBuffer into a Hermes agent: the background
-wait_for_mention loop calls on_radio_message(), and the tool executor
-calls drain_for_injection() after each tool call completes.
-
-This module does not import Hermes. The runtime appends the returned
-string at InjectionSite (default: tool result appendix) without invoking
-the model (0-turn).
+wait_for_mention loop calls on_message(), and the tool executor calls
+on_step_end() / drain_for_injection() after each tool call completes.
 """
 
-from __future__ import annotations
-
-from collections.abc import Mapping
-from dataclasses import dataclass
-from typing import Any
+from typing import Any, List, Sequence
 
 from drift_guard.buffer import DriftGuardBuffer
-from drift_guard.inject import DEFAULT_INJECTION_SITE, InjectionSite, format_injection
-from drift_guard.message import CrossAgentMessage
-
-
-@dataclass(frozen=True)
-class HermesRadioEvent:
-    """Gateway-shaped inbound radio/mention payload (no Hermes import)."""
-
-    text: str
-    sender: str = ""
-    ts: float | None = None
-
-
-def from_hermes_radio(
-    event: CrossAgentMessage | HermesRadioEvent | Mapping[str, Any],
-) -> CrossAgentMessage:
-    if isinstance(event, CrossAgentMessage):
-        return event
-    if isinstance(event, HermesRadioEvent):
-        return CrossAgentMessage(content=event.text, sender=event.sender, ts=event.ts)
-    if isinstance(event, Mapping):
-        text = event.get("text", event.get("content"))
-        if not isinstance(text, str):
-            raise TypeError(
-                "Hermes radio mapping needs a str 'text' or 'content' field"
-            )
-        sender = event.get("sender") or ""
-        ts = event.get("ts")
-        return CrossAgentMessage(content=text, sender=str(sender), ts=ts)
-    raise TypeError(
-        f"from_hermes_radio expects CrossAgentMessage, HermesRadioEvent, "
-        f"or mapping, got {type(event)!r}"
-    )
-
-
-def append_to_tool_result(tool_result: str, block: str) -> str:
-    """Append a drained injection block to a tool result. Empty block is a no-op."""
-    if not block:
-        return tool_result
-    if not tool_result:
-        return block
-    return f"{tool_result}\n{block}"
 
 
 class HermesDriftGuard:
@@ -66,43 +16,39 @@ class HermesDriftGuard:
     def __init__(self) -> None:
         self.buffer = DriftGuardBuffer()
 
-    def on_radio_message(
-        self,
-        msg: CrossAgentMessage | HermesRadioEvent | Mapping[str, Any],
-    ) -> None:
+    # Wire this into the background message watcher (wait_for_mention.sh style).
+    def on_radio_message(self, msg) -> None:
         # 0-turn: just buffer, never call the model.
-        self.buffer.on_message(from_hermes_radio(msg))
+        self.buffer.on_message(msg)
 
+    # Wire this into tool_dispatch_helpers / tool_executor after run_once.
     def on_tool_call_complete(self) -> list:
         return self.buffer.on_step_end()
 
-    def drain_for_injection(
-        self,
-        *,
-        site: InjectionSite = DEFAULT_INJECTION_SITE,
-    ) -> str:
-        return format_injection(self.on_tool_call_complete(), site=site)
+    # --- Phase 1 additions ------------------------------------------------
+    # Named for the injection site so adapters and the Hermes plugin can share
+    # a vocabulary: "drain the buffer and hand it to the injection point".
 
+    def drain_for_injection(self) -> List[Any]:
+        """Return buffered messages for safe injection at a step boundary.
 
-class HermesTurn:
-    """One Hermes-shaped turn: radio buffers, tool complete injects, no extra LLM call."""
+        Equivalent to on_tool_call_complete() but named for the consumer side
+        (e.g. right before the model emits a response, or inside the
+        transform_tool_result hook). Clears the buffer under lock.
+        """
+        return self.buffer.on_step_end()
 
-    def __init__(self) -> None:
-        self.guard = HermesDriftGuard()
-        self.transcript: list[dict[str, str]] = []
-        self.model_calls = 0
+    @staticmethod
+    def append_to_tool_result(result: str, messages: Sequence[Any]) -> str:
+        """Append buffered radio messages to a tool-result string.
 
-    def wait_for_mention(
-        self,
-        event: CrossAgentMessage | HermesRadioEvent | Mapping[str, Any],
-    ) -> None:
-        self.guard.on_radio_message(event)
-
-    def request_tool(self) -> None:
-        """Count the model call that emitted tool_calls. Radio must not call this."""
-        self.model_calls += 1
-
-    def complete_tool(self, name: str, result: str) -> str:
-        content = append_to_tool_result(result, self.guard.drain_for_injection())
-        self.transcript.append({"role": "tool", "name": name, "content": content})
-        return content
+        Used by the Hermes ``transform_tool_result`` hook: the plugin drains
+        the buffer at a safe boundary and appends the deferred messages to the
+        tool result so the model sees them *within* the step (0-turn, no extra
+        model turn). When ``messages`` is empty the original result is returned
+        unchanged.
+        """
+        if not messages:
+            return result
+        rendered = "\n".join(str(m) for m in messages)
+        return f"{result}\n\n[drift-guard] deferred radio messages:\n{rendered}"

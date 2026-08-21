@@ -1,0 +1,9 @@
+name: agent-drift-guard
+version: 0.1.0
+description: "0-turn passive-awareness plugin for Hermes. Buffers cross-agent (Coral/AgentRadio) messages during a step and injects them only at safe step boundaries (tool-call complete), so a mid-reasoning message never derails the model. Needs no extra model turn."
+author: "agent-drift-guard"
+hooks:
+  - on_session_start
+  - post_tool_call
+  - transform_tool_result
+  - on_session_end
