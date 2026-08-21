@@ -51,7 +51,9 @@ keep it in-turn).
 
 Hermes framing: `HermesDriftGuard.drain_for_injection()` buffers from the
 radio and returns the formatted block after each tool call. It does not
-import Hermes.
+import Hermes. The in-repo loop is `HermesTurn`
+(`python examples/hermes_loop.py`). Patch points for a real Hermes tree:
+[`docs/hermes-wiring.md`](docs/hermes-wiring.md).
 
 ## Status
 
