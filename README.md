@@ -56,6 +56,8 @@ import Hermes. The in-repo loop is `HermesTurn`
 [`docs/hermes-wiring.md`](docs/hermes-wiring.md).
 Upstream handoff (new PR, do not reuse #87441):
 [`docs/hermes-upstream-work-plan.md`](docs/hermes-upstream-work-plan.md).
+**Give this to a small/free coding agent (Hermes repo only, very explicit):**
+[`docs/HERMES_AGENT_EXECUTOR_PLAN.md`](docs/HERMES_AGENT_EXECUTOR_PLAN.md).
 
 ## Status
 

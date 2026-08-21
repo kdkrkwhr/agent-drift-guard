@@ -1,5 +1,10 @@
 # Hermes 0-turn 업스트림 작업계획서 (정정)
 
+> 무료/소형 에이전트에게 일을 맡길 때는 이 문서 대신
+> **[`docs/HERMES_AGENT_EXECUTOR_PLAN.md`](HERMES_AGENT_EXECUTOR_PLAN.md)** 만 주어라.
+> 그 문서는 저장소 혼동 방지와 금지 목록이 더 구체적이다.
+
+
 작성: 2026-08-21  
 정정: 2026-08-21 — 이미 열린 업스트림 PR(#87441)과 **새 PR** 규칙을 반영  
 실행 주체: **당신** (`kdkrkwhr`) — 핸드오프. AI 커밋을 hermes-agent에 남기지 마세요.  
@@ -31,7 +36,7 @@ GitHub은 같은 포크에서 브랜치만 다르면 PR을 여러 개 열 수 �
 할 것:
 
 - base는 **upstream `main`** (`NousResearch/hermes-agent`의 최신 `main`)
-- 브랜치 이름 예: `feat/session-busy-hook` (generic hook PR일 때) 또는 `feat/verify-drift-guard-plugin` (포크 로컬 검증만)
+- 브랜치 이름 예: `feat/gateway-session-is-busy` (generic hook PR일 때) 또는 `feat/verify-drift-guard-plugin` (포크 로컬 검증만)
 - `git checkout -b …` 의 출발점은 `feat/native-watch-tool`이 아니라 `upstream/main`
 
 ---
@@ -233,7 +238,7 @@ git clone git@github.com:kdkrkwhr/hermes-agent.git
 cd hermes-agent
 git remote add upstream git@github.com:NousResearch/hermes-agent.git   # 이미 있으면 skip
 git fetch upstream
-git checkout -b feat/session-busy-hook upstream/main   # 당신 브랜치, 당신 커밋만
+git checkout -b feat/gateway-session-is-busy upstream/main   # 당신 브랜치, 당신 커밋만
 # 확인: git branch --show-current  → feat/native-watch-tool 이면 안 됨
 ```
 
@@ -346,7 +351,7 @@ steer / observe-but-don’t-invoke (#15621 계열)와 겹치면, 새 기능이 �
 
 ```bash
 git branch --show-current
-# feat/native-watch-tool  → git checkout -b feat/session-busy-hook upstream/main
+# feat/native-watch-tool  → git checkout -b feat/gateway-session-is-busy upstream/main
 ```
 
 ### Phase 3 — 훅 부족 여부 판정
@@ -365,13 +370,13 @@ git branch --show-current
 
 ### Phase 4 — (조건부) NousResearch **새 PR**
 
-#87441을 업데이트하지 않습니다. 헤드를 `feat/session-busy-hook`로 해서 **create**.
+#87441을 업데이트하지 않습니다. 헤드를 `feat/gateway-session-is-busy`로 해서 **create**.
 
 ```bash
-git push -u origin feat/session-busy-hook
+git push -u origin feat/gateway-session-is-busy
 gh pr create --repo NousResearch/hermes-agent \
   --base main \
-  --head kdkrkwhr:feat/session-busy-hook \
+  --head kdkrkwhr:feat/gateway-session-is-busy \
   --title "feat(gateway): let plugins see whether a session is busy"
 # --base 가 feat/native-watch-tool 이면 잘못됨
 ```
@@ -423,7 +428,7 @@ Body:
 ## Note
 
 Separate from #87441 (native watch tool). This PR uses branch
-`feat/session-busy-hook` off upstream `main`. No overlapping files.
+`feat/gateway-session-is-busy` off upstream `main`. No overlapping files.
 
 ## Why
 
